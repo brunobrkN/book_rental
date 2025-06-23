@@ -21,3 +21,11 @@ def read_int(msg):
         except (ValueError, TypeError):
             print('\33[31mERROR! Value is not numeric.\33[m')
 
+def confirm():
+    while True:
+        answer = input('Do you want to continue?(Y/N): ').strip().upper()[0]
+        if answer in 'YN':
+            return answer
+        else:
+            print('\33[31mERROR! Please insert Y or N.\33[m')
+            

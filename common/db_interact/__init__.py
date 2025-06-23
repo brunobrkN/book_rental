@@ -28,3 +28,24 @@ class Db:
             print('\33[31mERROR! Database not found.\33[m')
             menu_title('New database created.')
             self.create_db(data=data)
+
+    def show_list(self):
+        line(55)
+        print(f'{"ID":2}', f'{"Book name":<38}',f'{"Author":<20}')
+        line(55)
+        self.chart.execute('SELECT * FROM books')
+        for i in range (0, len(self.chart.fetchall())):
+            for v in range(0, 3):
+                if v == 0:
+                    self.chart.execute('SELECT * FROM books')
+                    print(f'{self.chart.fetchall()[i][v]:<3}', end='')
+                else:
+                    self.chart.execute('SELECT * FROM books')
+                    print(f'{self.chart.fetchall()[i][v]:<40}', end='')
+            print()
+        self.close_conn()
+
+    def close_conn(self):
+        if self.conn:
+            self.conn.close()
+            
