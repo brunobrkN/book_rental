@@ -27,5 +27,11 @@ def menu(list):
     option = read_int('\33[33mChoose an option: \33[m')
     return option
 
-
+def confirm():
+    while True:
+        answer = input('Do you want to continue?(Y/N): ').strip().upper()[0]
+        if answer in 'YN':
+            return answer
+        else:
+            print('\33[31mERROR! Please insert Y or N.\33[m')
 

@@ -45,7 +45,18 @@ class Db:
             print()
         self.close_conn()
 
+    def rental(self, id):
+        self.chart.execute('SELECT * FROM books')
+        for i in range(0, len(self.chart.fetchall())):
+            if id == i:
+                self.chart.execute('SELECT * FROM books')
+                print(f'Book selected: "{self.chart.fetchall()[id-1][1]}"')
+                if confirm() in 'Y':
+                    print('did it') # corrigir após adicionar dados de estoque no banco de dados.
+                else:
+                    menu_title('Returning to menu...')
+        self.close_conn()
+
     def close_conn(self):
         if self.conn:
             self.conn.close()
-            
