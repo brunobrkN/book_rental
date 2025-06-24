@@ -3,60 +3,54 @@ from common.interface import *
 
 class Db:
     def __init__(self,db_name = 'library.db'):
-        self.chart = None
-        self.conn = None
         self.db_name = db_name
-        self.conn = sqlite3.connect(self.db_name)
-        self.chart = self.conn.cursor()
+        self._connect()
+        self._create_db()
 
-    def create_db(self,data):
-        self.chart.execute("""CREATE TABLE IF NOT EXISTS books (
+    def _connect(self):
+        self.conn = sqlite3.connect(self.db_name)
+        self.cursor = self.conn.cursor()
+
+    def _create_db(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS books (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         author TEXT NOT NULL,
         year INTEGER)""")
-        self.chart.execute('INSERT INTO books (title,author,year) VALUES (?, ?, ?)', data)
-        self.conn.commit()
-        self.close_conn()
 
     def add_new(self,data):
+        if not data:
+            pass
         try:
-            self.chart.execute('INSERT INTO books (title,author,year) VALUES (?,?,?)', data)
+            self.cursor.execute('INSERT INTO books (title,author,year) VALUES (?,?,?)', data)
             self.conn.commit()
-            self.close_conn()
-        except:
-            print('\33[31mERROR! Database not found.\33[m')
-            menu_title('New database created.')
-            self.create_db(data=data)
+        except sqlite3.ProgrammingError as e:
+            print(f'ERROr! {e} ')
+
 
     def show_list(self):
-        line(55)
-        print(f'{"ID":2}', f'{"Book name":<38}',f'{"Author":<20}')
-        line(55)
-        self.chart.execute('SELECT * FROM books')
-        for i in range (0, len(self.chart.fetchall())):
-            for v in range(0, 3):
-                if v == 0:
-                    self.chart.execute('SELECT * FROM books')
-                    print(f'{self.chart.fetchall()[i][v]:<3}', end='')
-                else:
-                    self.chart.execute('SELECT * FROM books')
-                    print(f'{self.chart.fetchall()[i][v]:<40}', end='')
-            print()
-        self.close_conn()
+        line()
+        print(f'{"ID":2}', f'{"Book name":<45}',f'{"Author":<20}')
+        line()
+        self.cursor.execute('SELECT id, title, author FROM books')
+        books = self.cursor.fetchall()
+        self.cursor.execute('SELECT * FROM books')
+        for book in books:
+            book_id, title, author = book
+            print(f'{book_id:<2} {title:<45} {author:<20}')
 
-    def rental(self, id):
-        self.chart.execute('SELECT * FROM books')
-        for i in range(0, len(self.chart.fetchall())):
-            if id == i:
-                self.chart.execute('SELECT * FROM books')
-                print(f'Book selected: "{self.chart.fetchall()[id-1][1]}"')
+    def rent(self, book_id):
+        self.cursor.execute('SELECT * FROM books')
+        books = self.cursor.fetchall()
+        for i in range(1, len(books)+1):
+            if book_id == i:
+                print(f'Book selected: "{books[i-1][1]}"')
                 if confirm() in 'Y':
-                    print('did it') # corrigir após adicionar dados de estoque no banco de dados.
+                    print('works') # corrigir após adicionar dados de estoque no banco de dados.
                 else:
                     menu_title('Returning to menu...')
-        self.close_conn()
 
     def close_conn(self):
         if self.conn:
+            print('Database connection closed.')
             self.conn.close()
