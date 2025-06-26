@@ -19,7 +19,6 @@ def menu(options):
     :param options: Todas as opções possíveis (pode ser adicionado diretamente no código principal)
     :return:
     """
-    menu_title('BOOK RENTAL STORE')
     count = 1
     for i in options:
         print(f'\33[36m{count}-\33[34m {i}\33[m')
