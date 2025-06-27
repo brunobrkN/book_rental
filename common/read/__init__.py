@@ -1,4 +1,5 @@
 from common import interface
+
 def new_book():
     book_name = input('Book name: ').title().strip()
     author = input('Author: ').title().strip()
@@ -17,7 +18,6 @@ def read_stock():
     print('2- Replace current stock')
     method = read_int('Choose an option: ')
     return method, book_id, book_stock
-
 
 def read_int(msg): #precisa ser revisto para as escolhas não ultrapassarem o valor limite em menu_title
     """
