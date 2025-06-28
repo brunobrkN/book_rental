@@ -1,4 +1,4 @@
-from common.db_interact import *
+from common.db_interaction import *
 while True:
     menu_title('BOOK RENTAL STORE')
     choice = menu(['Books available', 'Rent a book', 'Return a book', 'Stock (EMPLOYEES ONLY)', 'Exit'])
@@ -32,4 +32,3 @@ while True:
 book_Db.close_conn()
 menu_title('Exiting...')
 menu_title('Thank you for your preference!')
-

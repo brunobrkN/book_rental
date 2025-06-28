@@ -3,15 +3,27 @@ from common.interface import *
 
 class Db:
     def __init__(self,db_name = 'library.db'):
+        """
+            → Estabelece conexão e cria base de dados.
+        :param db_name:
+        """
         self.db_name = db_name
         self._connect()
         self._create_db()
 
     def _connect(self):
+        """
+            → Estabelece conexão com o banco de dados e define um cursor.
+        :return:
+        """
         self.conn = sqlite3.connect(self.db_name)
         self.cursor = self.conn.cursor()
 
     def _create_db(self):
+        """
+            → Cria a tabela no banco de dados.
+        :return:
+        """
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS books (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -20,6 +32,11 @@ class Db:
         stock INTEGER NOT NULL)""")
 
     def _availability(self, book_id):
+        """
+            → Verifica disponibilidade do livro no estoque.
+        :param book_id: ID do livro dentro do banco de dados.
+        :return: Título e estoque do livro (se maior que 0)
+        """
         book_title, books_available = \
         self.cursor.execute('SELECT title,stock FROM books WHERE id = :id', {'id': book_id}).fetchall()[0]
         if books_available == 0:
@@ -29,8 +46,11 @@ class Db:
             return book_title, books_available
 
     def add_new(self,data):
-        if not data:
-            pass
+        """
+            → Adiciona os dados novo livro no banco de dados .
+        :param data: Dados lidos pelo comando new_book(): title,author,year,stock
+        :return:
+        """
         try:
             self.cursor.execute('INSERT INTO books (title,author,year,stock) VALUES (?,?,?,?)', data) #método com '?' como placeholder
             self.conn.commit()
@@ -38,29 +58,46 @@ class Db:
             print(f'\33[31mERROR! {e}\33[m ')
 
     def stock(self, method, book_id, book_stock):
-        if method == 1:
-            self.cursor.execute("UPDATE books SET stock = stock + :stock WHERE id = :id", #método com valores designados explicitamente (mais legível)
-                                {'stock': book_stock, 'id': book_id})
-            self.conn.commit()
-            print('Stock updated successfully!')
-        if method == 2:
-            self.cursor.execute("UPDATE books SET stock = :stock WHERE id = :id",
-                                {'stock': book_stock,'id': book_id})
-            self.conn.commit()
-            print('Stock replaced successfully!')
-        if method == 3:
-            self.cursor.execute("UPDATE books SET stock = stock - :stock WHERE id = :id",
-                                # método com valores designados explicitamente (mais legível)
-                                {'stock': book_stock, 'id': book_id})
-            self.conn.commit()
-            print('Stock updated successfully!')
+        """
+            → Atualiza a coluna estoque do livro informado (id) no banco de dados .
+        :param method: Método de atualização:
+        1- Soma com o estoque atual
+        2- Substitui o estoque atual
+        3- Subtrai do estoque atual
+        :param book_id: ID do livro dentro do banco de dados.
+        :param book_stock: Quantidade a ser adicionado/ subtraido / substituido do estoque.
+        :return:
+        """
+        match method:
+            case 1:
+                self.cursor.execute("UPDATE books SET stock = stock + :stock WHERE id = :id", #método com valores designados explicitamente (mais legível)
+                                    {'stock': book_stock, 'id': book_id})
+                print('Stock updated successfully!')
+            case 2:
+                self.cursor.execute("UPDATE books SET stock = :stock WHERE id = :id",
+                                    {'stock': book_stock,'id': book_id})
+                print('Stock replaced successfully!')
+            case 3:
+                self.cursor.execute("UPDATE books SET stock = stock - :stock WHERE id = :id",
+                                    {'stock': book_stock, 'id': book_id})
+                print('Stock updated successfully!')
+        self.conn.commit()
 
     def remove_book(self, book_id):
+        """
+            → Remove todos os dados livro selecionado no banco de dados.
+        :param book_id: ID do livro dentro do banco de dados.
+        :return:
+        """
         self.cursor.execute("""DELETE FROM books WHERE id = :id""", {'id': book_id})
         self.conn.commit()
         print('Book removed successfully!')
 
     def show_list(self):
+        """
+            → Exibe a lista de livros disponíveis (com estoque > 0)
+        :return:
+        """
         line()
         print(f'{"ID":2}', f'{"Book name":<40}',f'{"Author":<15}',f'{"Stock":<8}')
         line()
@@ -75,6 +112,12 @@ class Db:
                 print(f'{book_id:<2} {title:<40} {author:<15} {stock:<8}')
 
     def rent_a_book(self, book_id):
+        """
+            → Aciona a função _availability() para verificação do estoque e faz a chamada da função stock(method = 3) para
+            reduzir do estoque conforme quantidade informada pelo usuário.
+        :param book_id: ID do livro dentro do banco de dados.
+        :return:
+        """
         book_title, books_available = self._availability(book_id = book_id)
         try:
                 if confirm() in 'Y':
@@ -93,6 +136,12 @@ class Db:
             print('\33[31mPlease enter a valid ID.\33[m'.center(70))
 
     def return_book(self, book_id):
+        """
+            → Verifica o livro a ser devolvido e aciona a função stock(method = 1) para adicionar de volta a quantidade
+             de livros ao estoque.
+        :param book_id: ID do livro dentro do banco de dados.
+        :return:
+        """
         try:
             book_title = self.cursor.execute('SELECT title FROM books WHERE id = :id', {'id': book_id}).fetchall()[0]
             print(f'Book selected: "{book_title}"')
@@ -105,6 +154,10 @@ class Db:
             print('\33[31mPlease enter a valid ID.\33[m'.center(70))
 
     def close_conn(self):
+        """
+        Fecha conexão com o banco de dados.
+        :return:
+        """
         if self.conn:
             print('Database connection closed.')
             self.conn.close()
