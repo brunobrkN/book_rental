@@ -5,7 +5,7 @@ class Db:
     def __init__(self,db_name = 'library.db'):
         """
             → Estabelece conexão e cria base de dados.
-        :param db_name:
+        :param db_name: Nome do arquivo de dados.
         """
         self.db_name = db_name
         self._connect()
@@ -37,17 +37,21 @@ class Db:
         :param book_id: ID do livro dentro do banco de dados.
         :return: Título e estoque do livro (se maior que 0)
         """
-        book_title, books_available = \
-        self.cursor.execute('SELECT title,stock FROM books WHERE id = :id', {'id': book_id}).fetchall()[0]
-        if books_available == 0:
-            print(f'Book "{book_title}" is not available!')
-        else:
-            print(f'Book selected: "{book_title}"')
-            return book_title, books_available
+        try:
+            book_title, books_available = \
+            self.cursor.execute('SELECT title,stock FROM books WHERE id = :id', {'id': book_id}).fetchall()[0]
+            if books_available == 0:
+                return adaptive_line(f'Book "{book_title}" is not available!')
+            else:
+                adaptive_line(f'Book selected: "{book_title}"')
+                return book_title, books_available
+        except IndexError:
+            return adaptive_line('No books available!')
+
 
     def add_new(self,data):
         """
-            → Adiciona os dados novo livro no banco de dados .
+            → Adiciona novo livro no banco de dados .
         :param data: Dados lidos pelo comando new_book(): title,author,year,stock
         :return:
         """
@@ -118,22 +122,21 @@ class Db:
         :param book_id: ID do livro dentro do banco de dados.
         :return:
         """
-        book_title, books_available = self._availability(book_id = book_id)
+
         try:
-                if confirm() in 'Y':
-                    how_many = read_int('How many books do you want to rent?: ')
-                    if 0 < how_many <= books_available:
-                        self.stock(method=3, book_id=book_id, book_stock=how_many)
-                        line()
-                        print(f'{how_many} book(s) rented successfully!')
-                    else:
-                        print(
-                            f"Sorry, we don't have this amount of books! Please confirm in the stock column the amount available.")
+            book_title, books_available = self._availability(book_id=book_id)
+            if confirm() in 'Y':
+                how_many = read_int('How many books do you want to rent?: ')
+                if 0 < how_many <= books_available:
+                    self.stock(method=3, book_id=book_id, book_stock=how_many)
+                    adaptive_line(f'{how_many} book(s) rented successfully!')
                 else:
-                    menu_title('Returning to menu...')
+                    adaptive_line(
+                        f"Sorry, we don't have this amount of books! Please confirm in the stock column the amount available.")
+            else:
+                menu_title('Returning to main menu...')
         except (TypeError,IndexError):
-            line()
-            print('\33[31mPlease enter a valid ID.\33[m'.center(70))
+            adaptive_line('\33[31mERROR! ID not found.\33[m')
 
     def return_book(self, book_id):
         """
@@ -144,14 +147,13 @@ class Db:
         """
         try:
             book_title = self.cursor.execute('SELECT title FROM books WHERE id = :id', {'id': book_id}).fetchall()[0]
-            print(f'Book selected: "{book_title}"')
+            adaptive_line(f'Book selected: "{book_title}"')
             book_return = read_int('How many books you want to return?: ')
             confirm()
             self.stock(method=1, book_id=book_id, book_stock = book_return)
-            print('Book(s) were returned successfully!')
+            adaptive_line('Book(s) were returned successfully!')
         except IndexError:
-            line()
-            print('\33[31mPlease enter a valid ID.\33[m'.center(70))
+            adaptive_line('\33[31mPlease enter a valid ID.\33[m')
 
     def close_conn(self):
         """
@@ -159,5 +161,5 @@ class Db:
         :return:
         """
         if self.conn:
-            print('Database connection closed.')
+            adaptive_line('Database connection closed.')
             self.conn.close()

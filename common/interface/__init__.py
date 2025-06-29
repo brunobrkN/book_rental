@@ -1,6 +1,14 @@
+from operator import length_hint
+
 from common.read import *
 def line(length=65):
-    return print('-' * length)
+    print('-' * length)
+
+def adaptive_line( phrase, second_line = False):
+    line(len(phrase.replace('\33[31m', '').replace('\33[m', '')))
+    print(phrase)
+    if second_line:
+        line(len(phrase))
 
 def menu_title(msg):
     """
@@ -11,7 +19,6 @@ def menu_title(msg):
     line()
     print(msg.center(60))
     line()
-
 
 def menu(options):
     """
@@ -25,3 +32,4 @@ def menu(options):
         count += 1
     option = read_int('\33[33mChoose an option: \33[m')
     return option
+

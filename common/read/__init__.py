@@ -1,17 +1,25 @@
 from common import interface
 
 def new_book():
+    """
+        → Lê os dados necessários para a função add_book().
+    :return: Lista com todos os dados lidos.
+    """
     book_name = input('Book name: ').title().strip()
     author = input('Author: ').title().strip()
     year = read_int('Publication year: ')
     stock = read_int('Stock: ')
-    interface.menu_title('Adding new book, please confirm the data.')
+    interface.adaptive_line('Adding new book, please confirm the data.', True)
     if confirm() == 'Y':
         return book_name,author,year,stock
     else:
         return None
 
 def read_stock():
+    """
+        → Lê os dados necessários para função stock().
+    :return: Lista com todos os dados lidos
+    """
     book_id = input('Book ID: ')
     book_stock = read_int('Amount: ')
     print('1- Add to current stock')
@@ -19,7 +27,7 @@ def read_stock():
     method = read_int('Choose an option: ')
     return method, book_id, book_stock
 
-def read_int(msg): #precisa ser revisto para as escolhas não ultrapassarem o valor limite em menu_title
+def read_int(msg):
     """
     => Lê um número inteiro previnindo possíveis erros de digitação/interrupção do programa.
     :param msg: Script exibido para o usuário
@@ -36,6 +44,11 @@ def read_int(msg): #precisa ser revisto para as escolhas não ultrapassarem o va
             print('\33[31mERROR! Value is not numeric.\33[m')
 
 def confirm(msg = 'Do you want to continue?(Y/N): '):
+    """
+        → Lê repostas de confirmação (Y/N).
+    :param msg: Mensagem a ser exibida para o usuário.
+    :return: Resposta 'Y' ou 'N'
+    """
     while True:
         try:
             answer = input(msg).strip().upper()[0]

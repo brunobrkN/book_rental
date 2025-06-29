@@ -27,8 +27,13 @@ while True:
                     book_Db.remove_book(book_id=read_int('Book ID: '))
                 case 4:
                     pass
+                case _:
+                    adaptive_line('\33[31mERROR! Option not found\33[m')
         case 5:
             break
+        case _:
+            adaptive_line('\33[31mERROR! Option not found\33[m')
+
 book_Db.close_conn()
 menu_title('Exiting...')
 menu_title('Thank you for your preference!')
