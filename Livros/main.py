@@ -21,6 +21,7 @@ while True:
                     if new_book_data:
                         book_Db.add_new(new_book_data)
                 case 2:
+                    book_Db.show_list(actual_stock=-100)
                     m, b_id, b_stock = read_stock()
                     book_Db.stock(method=m , book_id=b_id, book_stock=b_stock)
                 case 3:
@@ -33,7 +34,6 @@ while True:
             break
         case _:
             adaptive_line('\33[31mERROR! Option not found\33[m')
-
 book_Db.close_conn()
 menu_title('Exiting...')
 menu_title('Thank you for your preference!')

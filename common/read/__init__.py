@@ -5,7 +5,7 @@ def new_book():
         → Lê os dados necessários para a função add_book().
     :return: Lista com todos os dados lidos.
     """
-    book_name = input('Book name: ').title().strip()
+    book_name = input('Book name: ').strip()
     author = input('Author: ').title().strip()
     year = read_int('Publication year: ')
     stock = read_int('Stock: ')
@@ -20,7 +20,7 @@ def read_stock():
         → Lê os dados necessários para função stock().
     :return: Lista com todos os dados lidos
     """
-    book_id = input('Book ID: ')
+    book_id = read_int('Book ID: ')
     book_stock = read_int('Amount: ')
     print('1- Add to current stock')
     print('2- Replace current stock')
