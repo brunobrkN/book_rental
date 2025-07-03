@@ -8,10 +8,16 @@ while True:
             book_Db.show_list()
         case 2:
             book_Db.show_list()
+            book_id = read_int('Book ID: ')
+            amount = read_amount()
+            customer = input('Customer name: ').strip().title()
             line()
-            book_Db.rent_a_book(book_id=read_int('Book ID: '))
+            book_Db.rent_a_book(book_id=book_id, amount = amount, customer = customer)
         case 3:
-            book_Db.return_book(book_id = read_int('Book ID: '))
+            book_id = read_int('Book ID: ')
+            customer = input('Customer name: ').strip().title()
+            book_Db.return_book(book_id = book_id, customer = customer)
+
         case 4:
             menu_title('STOCK OPTIONS')
             choice = menu(['Add a new book', 'Book stock', 'Remove a book', 'Return to main menu'])
@@ -37,3 +43,4 @@ while True:
 book_Db.close_conn()
 menu_title('Exiting...')
 menu_title('Thank you for your preference!')
+book_Db.rent_period()

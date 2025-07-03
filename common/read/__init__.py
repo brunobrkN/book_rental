@@ -60,3 +60,7 @@ def confirm(msg = 'Do you want to continue?(Y/N): '):
                 print('\n\33[31mUser interrupted the application.\33[m')
         except IndexError:
             print('\33[31mERROR! Please insert Y or N.\33[m')
+
+def read_amount(msg = 'How many books do you want to rent?: '):
+    how_many = read_int(msg)
+    return how_many
