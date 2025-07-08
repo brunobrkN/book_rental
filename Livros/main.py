@@ -36,9 +36,6 @@ while True:
                     adaptive_line('\33[31mERROR! Option not found\33[m')
         case 5:
             break
-        case 6:
-            ID = read_int('Book ID: ')
-            rl.book_db.id_exists(ID)
         case _:
             adaptive_line('\33[31mERROR! Option not found\33[m')
 rl.book_db.close_conn()
