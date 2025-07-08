@@ -1,7 +1,7 @@
 import sqlite3
 from common.interface import *
 
-class Db:
+class Database:
     def __init__(self,db_name = 'library.db'):
         """
             → Estabelece conexão e cria base de dados.
@@ -9,7 +9,8 @@ class Db:
         """
         self.db_name = db_name
         self._connect()
-        self._create_book_db()
+        self._create_table()
+        self._create_table(table_name='register')
 
     def _connect(self):
         """
@@ -19,68 +20,47 @@ class Db:
         self.conn = sqlite3.connect(self.db_name)
         self.cursor = self.conn.cursor()
 
-    def _create_book_db(self):
+    def _create_table(self, table_name ='books'):
         """
                             → Cria a tabela no banco de dados.
                         :return:
                         """
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS books (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        author TEXT NOT NULL,
-        year INTEGER NOT NULL,
-        stock INTEGER NOT NULL)""")
+        column_0, column_1, column_2, column_3, column_4, column_5 = self.sql_args(table_name)
+        self.cursor.execute(f"""CREATE TABLE IF NOT EXISTS {table_name} (
+        {column_0} INTEGER PRIMARY KEY AUTOINCREMENT,
+        {column_1} TEXT NOT NULL,
+        {column_2} TEXT NOT NULL,
+        {column_3} INTEGER NOT NULL,
+        {column_4} INTEGER NOT NULL,
+        {column_5} INTEGER NOT NULL)""")
+        self.conn.commit()
 
-    def _create_register_db(self):
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS register (
-        id INTEGER NOT NULL,
-        customer TEXT NOT NULL,
-        amount INTEGER NOT NULL,
-        acquisition TEXT NOT NULL,
-        return TEXT NOT NULL)""")
-
-    def _availability(self, book_id):
-        """
-            → Verifica disponibilidade do livro no estoque.
-        :param book_id: ID do livro dentro do banco de dados.
-        :return: Título e estoque do livro (se maior que 0)
-        """
-        book_title, books_available = \
-        self.cursor.execute('SELECT title,stock FROM books WHERE id = :id', {'id': book_id}).fetchall()[0]
-        if books_available == 0:
-            return adaptive_line(f'Book "{book_title}" is not available!')
-        else:
-            adaptive_line(f'Book selected: "{book_title}"')
-            return book_title, books_available
-
-    def id_exists(self, book_id):
-        id_available = self.cursor.execute('SELECT id FROM books').fetchall()
-        try:
-            for i in range(1, id_available[-1][0] + 1):
-                if book_id == i:
-                    id_available = True
-                    return id_available
-                else:
-                    id_available = False
-            adaptive_line('\33[31mERROR! ID not found!\33[m', True)
-            return id_available
-        except IndexError:
-            adaptive_line('\33[31mERROR! No books found!\33[m', True)
-            return False
-
-    def add_new(self,data):
+    def insert(self, data, table_name = 'books'):
         """
             → Adiciona novo livro no banco de dados .
         :param* data: Dados lidos pelo comando new_book(): title,author,year,stock
         :return:
         """
+        column_0, column_1, column_2, column_3, column_4, column_5 = self.sql_args(table_name)
+        columns = (column_1 + column_2 + column_3 + column_4 + column_5).replace(' ', ',')
+        placeholders = ','.join('?' * len(columns.split(',')))
         try:
-            self.cursor.execute('INSERT INTO books (title,author,year,stock) VALUES (?,?,?,?)', data) #método com '?' como placeholder
+            self.cursor.execute(f'INSERT INTO {table_name} ({columns}) VALUES ({placeholders})', data) #método com '?' como placeholder
             self.conn.commit()
-        except sqlite3.ProgrammingError as e:
-            print(f'\33[31mERROR! {e}\33[m ')
+        except (sqlite3.ProgrammingError, sqlite3.OperationalError) as e:
+            return print(f'\33[31mERROR! {e}\33[m ')
 
-    def stock(self, method, book_id, book_stock):
+    def id_exists(self, book_id, table_name='books'):
+        column_0, column_1, column_2, column_3, column_4, column_5 = self.sql_args(table_name)
+        id_available = self.cursor.execute(f'SELECT {column_0} FROM {table_name} WHERE {column_0} = {book_id} ').fetchall()
+        if len(id_available) > 0:
+            exists = True
+        else:
+            print('\33[31mERROR! ID not found!\33[m ')
+            exists = False
+        return exists
+
+    def stock_update(self, method, book_id, book_stock):
         """
             → Altera o estoque no banco de dados.
         :param method: Método de atualização
@@ -92,28 +72,29 @@ class Db:
         if id_available:
             match method:
                 case 1:
-                    self.cursor.execute("UPDATE books SET stock = stock + :stock WHERE id = :id", #método com valores designados explicitamente (mais legível)
-                                        {'stock': book_stock, 'id': book_id})
-                    print('Stock updated successfully!')
+                    operator = 'stock +'
                 case 2:
-                    self.cursor.execute("UPDATE books SET stock = :stock WHERE id = :id",
-                                        {'stock': book_stock,'id': book_id})
-                    print('Stock replaced successfully!')
+                    operator = ''
                 case 3:
-                    self.cursor.execute("UPDATE books SET stock = stock - :stock WHERE id = :id",
-                                        {'stock': book_stock, 'id': book_id})
-                    print('Stock updated successfully!')
-            self.conn.commit()
+                    operator = 'stock -'
+            try:
+                self.cursor.execute(f"UPDATE books SET stock = {operator} :stock WHERE id = :id",
+                                    {'stock': book_stock, 'id': book_id})
+                self.conn.commit()
+            except (sqlite3.ProgrammingError, sqlite3.OperationalError) as e:
+                print(f'\33[31mERROR! {e}\33[m ')
 
-    def remove_book(self, book_id):
+    def remove(self, id, table_name ='books'):
         """
-            → Remove todos os dados livro selecionado no banco de dados.
-        :param book_id: ID do livro dentro do banco de dados.
+            → Remove todos os dados do id selecionado no banco de dados.
+        :param id: ID usado para identificar o livro/registrar dados da locação.
         :return:
         """
-        id_available = self.id_exists(book_id=book_id)
+        column_0, column_1, column_2, column_3, column_4, column_5 = self.sql_args(table_name)
+        id_available = self.id_exists(book_id = id)
         if id_available:
-            self.cursor.execute(f"""DELETE FROM books WHERE id = :id""", {'id': book_id})
+            verify_column = column_0
+            self.cursor.execute(f"""DELETE FROM {table_name} WHERE {verify_column} = :id""", {'id': id})
             self.conn.commit()
             print('Book removed successfully!')
 
@@ -135,71 +116,6 @@ class Db:
                 book_id, title, author, stock= book
                 print(f'{book_id:<2} {title:<40} {author:<15} {stock:<8}')
 
-    def rent_a_book(self, book_id, amount, customer):
-        """
-            → Aciona a função _availability() para verificação do estoque e faz a chamada da função stock(method = 3) para
-            reduzir do estoque conforme quantidade informada pelo usuário. Informa erro e retorna ao menu caso seja informado
-            o ID incorreto.
-        :param book_id: ID do livro dentro do banco de dados.
-        :param amount: Valor a ser alterado no estoque.
-        :return:
-        """
-        id_available = self.id_exists(book_id=book_id)
-        if id_available:
-            try:
-                book_title, books_available = self._availability(book_id=book_id)
-            except TypeError:
-                pass
-            else:
-                if confirm('The return period is 14 days, do you confirm the selected book?(Y/N): ') in 'Y':
-                    if 0 < amount <= books_available:
-                        self.add_to_register(book_id=book_id, amount=amount, customer = customer)
-                        self.stock(method=3, book_id=book_id, book_stock=amount)
-                    else:
-                        adaptive_line(
-                            f"Sorry, we don't have this amount of books! Please confirm in the stock column the amount available.")
-                else:
-                    menu_title('Returning to main menu...')
-
-    def add_to_register(self, book_id, amount, customer):
-        self._create_register_db()
-        acquisition, return_date = self.rent_period()
-        data = (book_id, customer,amount, acquisition, return_date)
-        self.cursor.execute('INSERT INTO register (id, customer,amount, acquisition, return) VALUES (?,?,?,?,?)', data)
-        self.conn.commit()
-
-    def return_book(self, book_id,  customer):
-        """
-            → Verifica o livro a ser devolvido e aciona a função stock(method = 1) para adicionar de volta a quantidade
-             de livros ao estoque.
-        :param book_id: ID do livro dentro do banco de dados.
-        :param rented_books: Quantos livros o cliente alugou.
-        :param  customer: Nome do cliente que alugou
-        :return:
-        """
-        id_available = self.id_exists(book_id=book_id)
-        if id_available:
-            try:
-                book_title = self.cursor.execute('SELECT title FROM books WHERE id = :id', {'id': book_id}).fetchone()[0]
-                rented_books = self.cursor.execute('SELECT amount FROM register WHERE id = :id AND customer = :customer', {'id': book_id,'customer' : customer}).fetchone()[0]
-                print(rented_books)
-            except IndexError:
-                adaptive_line('\33[31mPlease enter a valid ID.\33[m')
-            except Exception as e:
-                print(e)
-            else:
-                adaptive_line(f'Book selected: "{book_title}"')
-                if confirm() in 'Y':
-                    self.remove_from_register(book_id, customer)
-                    self.stock(method=1, book_id=book_id, book_stock = rented_books)
-                    adaptive_line('Book(s) were returned successfully!')
-
-    def remove_from_register(self, book_id, customer):
-        rented_books = self.cursor.execute('SELECT amount FROM register WHERE id = :id AND customer = :customer', {'id': book_id,'customer' : customer}).fetchall()[0]
-        print(rented_books)
-        self.cursor.execute("""DELETE FROM register WHERE id = :id AND customer = :customer""", {'id': book_id, 'customer' : customer})
-        self.conn.commit()
-
     def close_conn(self):
         """
         Fecha conexão com o banco de dados.
@@ -210,8 +126,11 @@ class Db:
             self.conn.close()
 
     @staticmethod
-    def rent_period():
-        import datetime
-        today = datetime.date.today()
-        return_date = datetime.date(today.year, today.month, today.day + 14)
-        return today, return_date
+    def sql_args(table_name='books'):
+        if table_name == 'books':
+            columns = ('id ', 'title ', 'author ', 'year ', 'stock ', 'price')
+        elif table_name == 'register':
+            columns = ('rental_id ', 'customer ', 'book_id ', 'amount ','acquisition ', 'return')
+        else:
+            return print('\33[31mERROR! Table is not in database.\33[m')
+        return columns

@@ -9,9 +9,10 @@ def new_book():
     author = input('Author: ').title().strip()
     year = read_int('Publication year: ')
     stock = read_int('Stock: ')
+    price = read_int('Price: $ ')
     interface.adaptive_line('Adding new book, please confirm the data.', True)
     if confirm() == 'Y':
-        return book_name,author,year,stock
+        return book_name,author,year,stock, price
     else:
         return None
 
@@ -61,6 +62,9 @@ def confirm(msg = 'Do you want to continue?(Y/N): '):
         except IndexError:
             print('\33[31mERROR! Please insert Y or N.\33[m')
 
-def read_amount(msg = 'How many books do you want to rent?: '):
-    how_many = read_int(msg)
-    return how_many
+def read_new_register(book_id, today, period):
+    amount = read_int('How many books do you want to rent?: ')
+    customer = input('Customer name: ').strip().title()
+    acquisition, return_date = today, period
+    data = (customer, book_id, amount, acquisition, return_date)
+    return data
