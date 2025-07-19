@@ -1,7 +1,7 @@
-import common.db_interaction
-from common.interface import *
+from common import db_interaction as di, text_formatter as form, read
 
-book_db = common.db_interaction.Database()
+
+book_db = di.Database()
 def rent_period():
     import datetime
     today = datetime.date.today()
@@ -21,18 +21,18 @@ def rent_a_book(book_id):
         except TypeError:
             return
         else:
-            if confirm('The return period is 14 days, do you confirm the selected book?(Y/N): ') in 'Y':
+            if read.confirm('The return period is 14 days, do you confirm the selected book?(Y/N): ') in 'Y':
                 today, period = rent_period()
-                register_data = read_new_register(book_id=book_id, today=today, period=period)
+                register_data = read.read_new_register(book_id=book_id, today=today, period=period)
                 amount = register_data[2]
                 if 0 < amount <= books_available:
                     book_db.insert(register_data, table_name='register')
                     book_db.stock_update(method=3, book_id=book_id, book_stock=amount)
                 else:
-                    adaptive_line(
+                    form.adaptive_line(
                         f"Sorry, we don't have this amount of books! Please confirm in the stock column the amount available.")
             else:
-                menu_title('Returning to main menu...')
+                form.menu_title('Returning to main menu...')
 
 def availability(book_id):
         """
@@ -43,9 +43,9 @@ def availability(book_id):
         book_title, books_available = \
             book_db.cursor.execute('SELECT title,stock FROM books WHERE id = :id', {'id': book_id}).fetchall()[0]
         if books_available == 0:
-            return adaptive_line(f'Book "{book_title}" is not available!')
+            return form.adaptive_line(f'Book "{book_title}" is not available!')
         else:
-            adaptive_line(f'Book selected: "{book_title}"')
+            form.adaptive_line(f'Book selected: "{book_title}"')
             return book_title, books_available
 
 def return_book(rental_id,  book_id):
@@ -57,18 +57,18 @@ def return_book(rental_id,  book_id):
     :return:
     """
     id_available = book_db.id_exists(book_id=book_id)
-
-    if id_available:
+    rental_id_available = book_db.id_exists(book_id=rental_id, table_name='register')
+    if id_available and rental_id_available:
         try:
             book_title = book_db.cursor.execute('SELECT title FROM books WHERE id = :id', {'id': book_id}).fetchone()[0]
             rented_books = book_db.cursor.execute('SELECT amount FROM register WHERE rental_id = :rental_id', {'rental_id': book_id}).fetchone()[0]
         except IndexError:
-            adaptive_line('\33[31mPlease enter a valid ID.\33[m')
+            form.adaptive_line('\33[31mPlease enter a valid ID.\33[m')
         except Exception as e:
             print(e)
         else:
-            adaptive_line(f'Book selected: "{book_title}"')
-            if confirm() in 'Y':
+            form.adaptive_line(f'Book selected: "{book_title}"')
+            if read.confirm() in 'Y':
                 book_db.remove(id = rental_id, table_name ='register')
                 book_db.stock_update(method=1, book_id=book_id, book_stock = rented_books)
-                adaptive_line('Book(s) were returned successfully!')
+                form.adaptive_line('Book(s) were returned successfully!')

@@ -1,5 +1,5 @@
 import sqlite3
-from common.interface import *
+from common import text_formatter as form
 
 class Database:
     def __init__(self,db_name = 'library.db'):
@@ -103,9 +103,9 @@ class Database:
             → Exibe a lista de livros disponíveis (com estoque > 0)
         :return:
         """
-        line()
+        form.line()
         print(f'{"ID":2}', f'{"Book name":<40}',f'{"Author":<15}',f'{"Stock":<8}')
-        line()
+        form.line()
         self.cursor.execute('SELECT id, title, author, stock FROM books WHERE stock != :stock', {'stock': actual_stock})
         books = self.cursor.fetchall()
         if len(books) == 0:
@@ -122,7 +122,7 @@ class Database:
         :return:
         """
         if self.conn:
-            adaptive_line('Database connection closed.')
+            form.adaptive_line('Database connection closed.')
             self.conn.close()
 
     @staticmethod

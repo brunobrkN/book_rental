@@ -1,4 +1,4 @@
-from common import interface
+from common import text_formatter
 
 def new_book():
     """
@@ -10,7 +10,7 @@ def new_book():
     year = read_int('Publication year: ')
     stock = read_int('Stock: ')
     price = read_int('Price: $ ')
-    interface.adaptive_line('Adding new book, please confirm the data.', True)
+    text_formatter.adaptive_line('Adding new book, please confirm the data.', True)
     if confirm() == 'Y':
         return book_name,author,year,stock, price
     else:

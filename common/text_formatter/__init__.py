@@ -1,6 +1,4 @@
-from operator import length_hint
-
-from common.read import *
+from common import read
 def line(length=65):
     print('-' * length)
 
@@ -30,6 +28,5 @@ def menu(options):
     for i in options:
         print(f'\33[36m{count}-\33[34m {i}\33[m')
         count += 1
-    option = read_int('\33[33mChoose an option: \33[m')
+    option = read.read_int('\33[33mChoose an option: \33[m')
     return option
-
