@@ -5,14 +5,13 @@ def new_book():
         → Lê os dados necessários para a função add_book().
     :return: Lista com todos os dados lidos.
     """
-    book_name = input('Book name: ').strip()
+    book_title = input('Book name: ').strip()
     author = input('Author: ').title().strip()
     year = read_int('Publication year: ')
     stock = read_int('Stock: ')
-    price = read_int('Price: $ ')
     text_formatter.adaptive_line('Adding new book, please confirm the data.', True)
     if confirm() == 'Y':
-        return book_name,author,year,stock, price
+        return book_title,author,year,stock
     else:
         return None
 
@@ -22,11 +21,8 @@ def read_stock():
     :return: Lista com todos os dados lidos
     """
     book_id = read_int('Book ID: ')
-    book_stock = read_int('Amount: ')
-    print('1- Add to current stock')
-    print('2- Replace current stock')
-    method = read_int('Choose an option: ')
-    return method, book_id, book_stock
+    book_stock = read_int('New book stock: ')
+    return  book_id, book_stock
 
 def read_int(msg):
     """
