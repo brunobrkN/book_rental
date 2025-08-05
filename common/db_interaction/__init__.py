@@ -1,7 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, String,ForeignKey
 from sqlalchemy.orm import sessionmaker, declarative_base
-from common import text_formatter as form
-
 
 class DbInteraction:
     db = create_engine('sqlite:///book.db')
@@ -23,6 +21,7 @@ class DbInteraction:
             self.author = author
             self.year = year
             self.stock = stock
+            DbInteraction.create_base()
 
     class User(Base):
         __tablename__ = 'users'
@@ -33,11 +32,11 @@ class DbInteraction:
         def __init__(self, name, email):
             self.name = name
             self.email = email
-
+            DbInteraction.create_base()
     class Leased(Base):
         __tablename__ = 'leased'
 
-        id = Column(Integer, primary_key=True, autoincrement=True)
+        rental_id = Column(Integer, primary_key=True, autoincrement=True)
         owner_id = Column(Integer, ForeignKey('users.id'))
         book_id = Column(Integer, ForeignKey('books.id'))
         amount = Column(Integer, nullable=False)
@@ -50,5 +49,8 @@ class DbInteraction:
             self.book_id = book_id
             self.acquisition = acquisition
             self.return_date = return_date
+            DbInteraction.create_base()
 
-    Base.metadata.create_all(bind=db)
+    @staticmethod
+    def create_base():
+        DbInteraction.Base.metadata.create_all(bind=DbInteraction.db)

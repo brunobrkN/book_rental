@@ -1,36 +1,31 @@
 from common import rental_logic as rl, text_formatter as form, read
-from common.db_interaction import DbInteraction
-
-
-books = rl.BookManager()
-
+rl.lease_time()
 
 while True:
     form.menu_title('BOOK RENTAL STORE')
     choice = form.menu(['Books available', 'Rent a book', 'Return a book', 'Stock (EMPLOYEES ONLY)', 'Exit'])
     match choice:
         case 1:
-            books.show_list()
+            rl.show_list()
         case 2:
-            books.show_list()
-            books.new_book()
+            rl.show_list()
+            rl.add_new('lease')
         case 3:
-            rental_id = read.read_int('Rental ID: ')
-            book_id = read.read_int('Book ID: ')
-            rl.return_book(rental_id = rental_id, book_id = book_id)
-
+            rl.return_book()
         case 4:
             form.menu_title('STOCK OPTIONS')
             choice = form.menu(['Add a new book', 'Book stock', 'Remove a book', 'Return to main menu'])
             match choice:
                 case 1:
-                    books.new_book()
+                    rl.add_new('book')
                 case 2:
-                    books.update_stock()
+                    book_id, stock = read.read_stock()
+                    rl.stock_update(book_id, stock)
                 case 3:
-                    pass
+                    book_id = read.read_int("Enter a book id:")
+                    rl.delete_from_table('book',book_id)
                 case 4:
-                    pass
+                    continue
                 case _:
                     form.adaptive_line('\33[31mERROR! Option not found\33[m')
         case 5:

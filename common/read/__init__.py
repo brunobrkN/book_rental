@@ -1,4 +1,4 @@
-from common import text_formatter
+from common import text_formatter, rental_logic
 
 def new_book():
     """
@@ -58,9 +58,13 @@ def confirm(msg = 'Do you want to continue?(Y/N): '):
         except IndexError:
             print('\33[31mERROR! Please insert Y or N.\33[m')
 
-def read_new_register(book_id, today, period):
+def read_new_lease( ):
+    answer = confirm(msg='Do you already have a store registration?(Y/N): ')
+    if answer == 'Y':
+        pass
+    if answer == 'N':
+        rental_logic.add_new('user')
+    book_id = read_int('Book ID: ')
     amount = read_int('How many books do you want to rent?: ')
-    customer = input('Customer name: ').strip().title()
-    acquisition, return_date = today, period
-    data = (customer, book_id, amount, acquisition, return_date)
-    return data
+    email = input('Email: ').lower().strip()
+    return email,amount,book_id
