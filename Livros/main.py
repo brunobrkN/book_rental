@@ -1,15 +1,15 @@
-from common import rental_logic as rl, text_formatter as form, read
-rl.lease_time()
+from common import rental_logic as rl, text_formatter as form, read, workflow
+
 
 while True:
     form.menu_title('BOOK RENTAL STORE')
     choice = form.menu(['Books available', 'Rent a book', 'Return a book', 'Stock (EMPLOYEES ONLY)', 'Exit'])
     match choice:
         case 1:
-            rl.show_book_list()
+            rl.show_books()
         case 2:
-            rl.show_book_list()
-            rl.add_new('lease')
+            rl.show_books()
+            workflow.add_new('leases')
         case 3:
             rl.return_book()
         case 4:
@@ -17,17 +17,21 @@ while True:
             choice = form.menu(['Add a new book', 'Book stock', 'Remove a book', 'Delete user', 'Delete rental', 'Return to main menu'])
             match choice:
                 case 1:
-                    rl.add_new('book')
+                    workflow.add_new('books')
                 case 2:
+                    rl.show_books()
                     book_id, stock = read.read_stock()
                     rl.stock_update(book_id, stock)
                 case 3:
+                    rl.show_books()
                     book_id = read.read_int("Enter a book id:")
-                    rl.delete_from_table('book')
+                    workflow.delete_from_table('books')
                 case 4:
-                    rl.delete_from_user()
+                    rl.show_users()
+                    workflow.delete_from_table('users')
                 case 5:
-                    rl.delete_from_lease()
+                    rl.show_leases()
+                    workflow.delete_from_table('leases')
                 case 6:
                     continue
                 case _:

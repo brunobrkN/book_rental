@@ -1,16 +1,6 @@
 from common import text_formatter as form, read
 from common.db_interaction import DbInteraction as Db
 
-def add_new(table):
-    match table:
-        case 'book':
-            add_new_book()
-        case 'user':
-            add_new_user()
-        case 'lease':
-            add_new_lease()
-    return print(f'New {table} registered in database.')
-
 def add_new_book():
     try:
         book_title, author, year, stock = read.new_book()
@@ -37,20 +27,11 @@ def  add_new_lease():
     owner_id = Db.session.query(Db.User).filter_by(email=email).first()
     if not owner_id:
         return print('Email not registered.')
-    lease_data = Db.Leased(owner_id=owner_id.id, book_id=book_id, amount = amount, acquisition=acquisition, return_date=return_date, status=1)
+    lease_data = Db.Leases(owner_id=owner_id.id, book_id=book_id, amount = amount, acquisition=acquisition, return_date=return_date, status='Active')
     Db.session.add(lease_data)
     book_update = Db.session.query(Db.Book).filter_by(id=book_id).first()
     book_update.stock = book_update.stock - amount
     Db.session.commit()
-
-def delete_from_table(table):
-    match table:
-        case 'book':
-            delete_from_book()
-        case 'user':
-            delete_from_user()
-        case 'lease':
-            delete_from_lease()
 
 def delete_from_book():
     try:
@@ -65,15 +46,8 @@ def delete_from_book():
 
 def delete_from_lease():
     try:
-        form.adaptive_line(f'{'Rental ID':10} {'Owner ID':10} {'Book ID':10} {'Amount':10} {'Acquisition':14}{'Return Date':10} {"Status"}', True)
-        lease_list = Db.session.query(Db.Leased).all()
-        for lease in lease_list:
-            if not lease.status:
-                status = 'Inactive'
-                print(f'{lease.rental_id:<10} {lease.owner_id:<10} {lease.book_id:<10} {lease.amount:<10}  {lease.acquisition:<14} {lease.return_date:<10} {status:<10}')
-        form.line()
         rental_id = int(input('Rental ID to delete: '))
-        lease_to_delete = Db.session.query(Db.Leased).filter_by(rental_id=rental_id).first()
+        lease_to_delete = Db.session.query(Db.Leases).filter_by(rental_id=rental_id).first()
         if lease_to_delete:
             Db.session.delete(lease_to_delete)
             Db.session.commit()
@@ -105,21 +79,21 @@ def return_book():
 
         if not user_query:
             return print('User does not exist!')
-        lease_query = Db.session.query(Db.Leased).filter_by(owner_id=user_query.id).all()
+        lease_query = Db.session.query(Db.Leases).filter_by(owner_id=user_query.id).all()
 
         if not lease_query:
             return print('User not have a leased books!')
 
         form.adaptive_line(f'{'Rental ID':10} {'Owner ID':10} {'Book ID':10} {'Amount':10} {'Acquisition':14}{'Return Date':10} {"Status"}',True)
-
+        count = 0
         for lease in lease_query:
-            if lease.status:
-                status = 'Active'
-            else:
-                status = 'Inactive'
-            print(f'{lease.rental_id:<10} {lease.owner_id:<10} {lease.book_id:<10} {lease.amount:<10}  {lease.acquisition:<14} {lease.return_date:<10} {status:<10}')
+            if lease.status == 'Active':
+                print(f'{lease.rental_id:<10} {lease.owner_id:<10} {lease.book_id:<10} {lease.amount:<10}  {lease.acquisition:<14} {lease.return_date:<10} {lease.status:<10}')
+                count += 1
+        if count == 0:
+            return print('No leases available to this user!')
         rental_id = read.read_int('Select a rental ID to return: ')
-        id_query = Db.session.query(Db.Leased).filter_by(rental_id=rental_id).first()
+        id_query = Db.session.query(Db.Leases).filter_by(rental_id=rental_id).first()
 
         if not id_query:
             return print('Rental ID not found!')
@@ -133,18 +107,37 @@ def return_book():
 
         new_stock = update_stock.stock + id_query.amount
         stock_update(update_stock.id, new_stock)
-        id_query.status = False
+        id_query.status = 'Inactive'
         Db.session.commit()
     except Exception as e:
         print(f'Error returning book: {e}')
 
-def show_book_list():
-    form.adaptive_line(f'ID {"Title":<30}  {'Author':<15}  {'Year':<10}  {'Stock'}', True)
-    book_list = Db.session.query(Db.Book).all()
-    for book in book_list:
-        if book.stock >=1:
-            print(f'{book.id}  {book.title:.<30}  {book.author:<15}  {book.year:<10}  {book.stock}')
-    form.line()
+def show_lists(table_class, columns):
+    table_lists =  Db.session.query(table_class).all()
+    for item in table_lists:
+        data_string = ' '.join([f'{getattr(item, field):<{width}}' for field, width in columns.items()])
+        print(data_string)
+
+def show_books():
+    table_class = Db.Book
+    columns = {'id' : 4, 'title' : 25, 'author': 15, 'year': 4, 'stock' : 4}
+    header =  ' '.join(f'{column.title():<{width}}' for column, width in columns.items())
+    form.adaptive_line(header,True)
+    show_lists(table_class, columns)
+
+def show_users():
+    table_class = Db.User
+    columns = {'id' : 4, 'name' : 25, 'email': 15}
+    header =  ' '.join(f'{column.title():<{width}}' for column, width in columns.items())
+    form.adaptive_line(header,True)
+    show_lists(table_class, columns)
+
+def show_leases():
+    table_class = Db.Leases
+    columns = {'rental_id': 9, 'owner_id': 8, 'book_id': 7, 'amount': 6, 'acquisition': 11, 'return_date': 11, 'status': 8}
+    header = ' '.join(f'{column.title():<{width}}' for column, width in columns.items())
+    form.adaptive_line(header,True)
+    show_lists(table_class, columns)
 
 def stock_update(book_id, stock):
     try:
@@ -155,3 +148,4 @@ def stock_update(book_id, stock):
             print('Stock updated sucessfully!')
     except Exception as e:
         print('ERROR to update book:', e)
+

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, VARCHAR
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 class DbInteraction:
@@ -6,8 +6,7 @@ class DbInteraction:
     Session = sessionmaker(db)
     session = Session()
     Base = declarative_base()
-
-
+    metadata = Base.metadata
 
     class Book(Base):
         __tablename__ = 'books'
@@ -35,8 +34,8 @@ class DbInteraction:
             self.name = name
             self.email = email
             DbInteraction.create_base()
-    class Leased(Base):
-        __tablename__ = 'leased'
+    class Leases(Base):
+        __tablename__ = 'leases'
 
         rental_id = Column(Integer, primary_key=True, autoincrement=True)
         owner_id = Column(Integer, ForeignKey('users.id'))
@@ -44,7 +43,7 @@ class DbInteraction:
         amount = Column(Integer, nullable=False)
         acquisition = Column(Integer, nullable=False)
         return_date = Column(Integer, nullable=False)
-        status = Column(Boolean, nullable=False)
+        status = Column(VARCHAR, nullable=False)
 
         def __init__(self, amount, owner_id, book_id, acquisition, return_date, status):
             self.amount = amount
@@ -52,7 +51,7 @@ class DbInteraction:
             self.book_id = book_id
             self.acquisition = acquisition
             self.return_date = return_date
-            self.status = status
+            self.status = "Active"
             DbInteraction.create_base()
 
     @staticmethod

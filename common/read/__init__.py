@@ -1,4 +1,4 @@
-from common import text_formatter, rental_logic
+from common import text_formatter, workflow as workflow
 
 def new_book():
     """
@@ -63,8 +63,12 @@ def read_new_lease( ):
     if answer == 'Y':
         pass
     if answer == 'N':
-        rental_logic.add_new('user')
+        workflow.add_new('user')
     book_id = read_int('Book ID: ')
     amount = read_int('How many books do you want to rent?: ')
     email = input('Email: ').lower().strip()
     return email,amount,book_id
+
+def read_menu_choice():
+    choice = read_int('Select an option: ')
+    return choice
