@@ -8,8 +8,8 @@ class DbInteraction:
     Base = declarative_base()
     metadata = Base.metadata
 
-    class Book(Base):
-        __tablename__ = 'books'
+    class Books(Base):
+        __tablename__ = 'Books'
 
         id = Column( Integer, primary_key=True, autoincrement=True)
         title = Column( String(100), nullable=False)
@@ -24,8 +24,8 @@ class DbInteraction:
             self.stock = stock
             DbInteraction.create_base()
 
-    class User(Base):
-        __tablename__ = 'users'
+    class Users(Base):
+        __tablename__ = 'Users'
         id = Column(Integer, primary_key=True, autoincrement=True)
         name = Column(String(100), nullable=False)
         email = Column(String(100), nullable=False)
@@ -35,7 +35,7 @@ class DbInteraction:
             self.email = email
             DbInteraction.create_base()
     class Leases(Base):
-        __tablename__ = 'leases'
+        __tablename__ = 'Leases'
 
         rental_id = Column(Integer, primary_key=True, autoincrement=True)
         owner_id = Column(Integer, ForeignKey('users.id'))

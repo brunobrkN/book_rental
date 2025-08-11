@@ -4,7 +4,7 @@ from common.db_interaction import DbInteraction as Db
 def add_new_book():
     try:
         book_title, author, year, stock = read.new_book()
-        new_book = Db.Book(book_title, author, year, stock)
+        new_book = Db.Books(book_title, author, year, stock)
         Db.session.add(new_book)
         Db.session.commit()
     except Exception as e:
@@ -13,30 +13,30 @@ def add_new_book():
 def add_new_user():
     name = input('Name: ').strip().title()
     email = input('Email: ').strip().lower()
-    email_query = Db.session.query(Db.User).filter_by(email=email).first()
+    email_query = Db.session.query(Db.Users).filter_by(email=email).first()
     if email_query:
         return print('Email already registered')
     else:
-        new_user = Db.User(name,email)
+        new_user = Db.Users(name, email)
         Db.session.add(new_user)
         Db.session.commit()
 
 def  add_new_lease():
     email, amount,book_id = read.read_new_lease()
     return_date,acquisition = lease_time()
-    owner_id = Db.session.query(Db.User).filter_by(email=email).first()
+    owner_id = Db.session.query(Db.Users).filter_by(email=email).first()
     if not owner_id:
         return print('Email not registered.')
     lease_data = Db.Leases(owner_id=owner_id.id, book_id=book_id, amount = amount, acquisition=acquisition, return_date=return_date, status='Active')
     Db.session.add(lease_data)
-    book_update = Db.session.query(Db.Book).filter_by(id=book_id).first()
+    book_update = Db.session.query(Db.Books).filter_by(id=book_id).first()
     book_update.stock = book_update.stock - amount
     Db.session.commit()
 
 def delete_from_book():
     try:
         book_id = input('Book ID to delete: ')
-        book_to_delete = Db.session.query(Db.Book).filter_by(id=book_id).first()
+        book_to_delete = Db.session.query(Db.Books).filter_by(id=book_id).first()
         if book_to_delete:
             Db.session.delete(book_to_delete)
             Db.session.commit()
@@ -58,7 +58,7 @@ def delete_from_lease():
 def delete_from_user():
     try:
         email = input('Email to delete: ')
-        user_to_delete = Db.session.query(Db.User).filter_by(email=email).first()
+        user_to_delete = Db.session.query(Db.Users).filter_by(email=email).first()
         if user_to_delete:
             Db.session.delete(user_to_delete)
             Db.session.commit()
@@ -75,7 +75,7 @@ def lease_time():
 def return_book():
     try:
         email = input('Email: ').strip().lower()
-        user_query = Db.session.query(Db.User).filter_by(email=email).first()
+        user_query = Db.session.query(Db.Users).filter_by(email=email).first()
 
         if not user_query:
             return print('User does not exist!')
@@ -101,7 +101,7 @@ def return_book():
         if not id_query.status:
             return print('Rental ID is already inactive!')
 
-        update_stock = Db.session.query(Db.Book).filter_by(id=id_query.book_id).first()
+        update_stock = Db.session.query(Db.Books).filter_by(id=id_query.book_id).first()
         if not update_stock:
             return print('Book ID not found!')
 
@@ -112,40 +112,30 @@ def return_book():
     except Exception as e:
         print(f'Error returning book: {e}')
 
-def show_lists(table_class, columns):
+def show_list(table_class, columns):
     table_lists =  Db.session.query(table_class).all()
     for item in table_lists:
         data_string = ' '.join([f'{getattr(item, field):<{width}}' for field, width in columns.items()])
         print(data_string)
 
-def show_books():
-    table_class = Db.Book
-    columns = {'id' : 4, 'title' : 25, 'author': 15, 'year': 4, 'stock' : 4}
-    header =  ' '.join(f'{column.title():<{width}}' for column, width in columns.items())
-    form.adaptive_line(header,True)
-    show_lists(table_class, columns)
-
-def show_users():
-    table_class = Db.User
-    columns = {'id' : 4, 'name' : 25, 'email': 15}
-    header =  ' '.join(f'{column.title():<{width}}' for column, width in columns.items())
-    form.adaptive_line(header,True)
-    show_lists(table_class, columns)
-
-def show_leases():
-    table_class = Db.Leases
-    columns = {'rental_id': 9, 'owner_id': 8, 'book_id': 7, 'amount': 6, 'acquisition': 11, 'return_date': 11, 'status': 8}
-    header = ' '.join(f'{column.title():<{width}}' for column, width in columns.items())
-    form.adaptive_line(header,True)
-    show_lists(table_class, columns)
+def list_to_show(table):
+    table_class = getattr(Db, table)
+    columns = Db.Books.metadata.tables[table].columns.keys()
+    if table == 'Leases':
+        width = [9,8,7,6,11,11,8]
+    else:
+        width = [4,25,15,4,4]
+    columns_dict = dict(zip(columns, width))
+    header = ' '.join(f'{column.title():<{width}}' for column, width in columns_dict.items()).replace('_', ' ')
+    form.adaptive_line(header, True)
+    show_list(table_class, columns_dict)
 
 def stock_update(book_id, stock):
     try:
-        book_update = Db.session.query(Db.Book).filter_by(id = book_id).first()
+        book_update = Db.session.query(Db.Books).filter_by(id = book_id).first()
         if book_update:
             book_update.stock = stock
             Db.session.commit()
             print('Stock updated sucessfully!')
     except Exception as e:
         print('ERROR to update book:', e)
-
