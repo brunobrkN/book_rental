@@ -37,9 +37,9 @@ class DbInteraction:
     class Leases(Base):
         __tablename__ = 'Leases'
 
-        rental_id = Column(Integer, primary_key=True, autoincrement=True)
-        owner_id = Column(Integer, ForeignKey('users.id'))
-        book_id = Column(Integer, ForeignKey('books.id'))
+        id  = Column(Integer, primary_key=True, autoincrement=True)
+        owner_id = Column(Integer, ForeignKey('Users.id'))
+        book_id = Column(Integer, ForeignKey('Books.id'))
         amount = Column(Integer, nullable=False)
         acquisition = Column(Integer, nullable=False)
         return_date = Column(Integer, nullable=False)

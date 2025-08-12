@@ -1,5 +1,4 @@
-from common import text_formatter, workflow as workflow
-
+from common import text_formatter, rental_logic as rl
 def new_book():
     """
         → Lê os dados necessários para a função add_book().
@@ -63,7 +62,7 @@ def read_new_lease( ):
     if answer == 'Y':
         pass
     if answer == 'N':
-        workflow.add_new('user')
+        rl.add_new('user')
     book_id = read_int('Book ID: ')
     amount = read_int('How many books do you want to rent?: ')
     email = input('Email: ').lower().strip()

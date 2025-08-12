@@ -1,6 +1,17 @@
 from common import text_formatter as form, read
 from common.db_interaction import DbInteraction as Db
 
+def add_new(table):
+    match table:
+        case 'book':
+            add_new_book()
+        case 'user':
+            add_new_user()
+        case 'leases':
+            list_to_show('Books')
+            add_new_lease()
+    return print(f'New {table} registered in database.')
+
 def add_new_book():
     try:
         book_title, author, year, stock = read.new_book()
@@ -8,7 +19,7 @@ def add_new_book():
         Db.session.add(new_book)
         Db.session.commit()
     except Exception as e:
-        print('ERROR to add new book:', e)
+        print(f'\33[31mERROR to add new book:{e}\33[m')
 
 def add_new_user():
     name = input('Name: ').strip().title()
@@ -33,38 +44,14 @@ def  add_new_lease():
     book_update.stock = book_update.stock - amount
     Db.session.commit()
 
-def delete_from_book():
-    try:
-        book_id = input('Book ID to delete: ')
-        book_to_delete = Db.session.query(Db.Books).filter_by(id=book_id).first()
-        if book_to_delete:
-            Db.session.delete(book_to_delete)
-            Db.session.commit()
-            print('Book deleted!')
-    except Exception as e:
-        print(f'Error deleting user: {e}')
-
-def delete_from_lease():
-    try:
-        rental_id = int(input('Rental ID to delete: '))
-        lease_to_delete = Db.session.query(Db.Leases).filter_by(rental_id=rental_id).first()
-        if lease_to_delete:
-            Db.session.delete(lease_to_delete)
-            Db.session.commit()
-            print('Lease deleted!')
-    except Exception as e:
-        print(f'Error deleting user: {e}')
-
-def delete_from_user():
-    try:
-        email = input('Email to delete: ')
-        user_to_delete = Db.session.query(Db.Users).filter_by(email=email).first()
-        if user_to_delete:
-            Db.session.delete(user_to_delete)
-            Db.session.commit()
-            print('User deleted!')
-    except Exception as e:
-        print(f'Error deleting user: {e}')
+def delete_from_table(table):
+    list_to_show(table)
+    query = int(input('Id to delete: '))
+    delete_data = Db.session.query(getattr(Db,table)).filter_by(id=query).first()
+    if delete_data:
+        Db.session.delete(delete_data)
+        Db.session.commit()
+        print('User deleted!')
 
 def lease_time():
     from datetime import datetime, timedelta
@@ -88,12 +75,12 @@ def return_book():
         count = 0
         for lease in lease_query:
             if lease.status == 'Active':
-                print(f'{lease.rental_id:<10} {lease.owner_id:<10} {lease.book_id:<10} {lease.amount:<10}  {lease.acquisition:<14} {lease.return_date:<10} {lease.status:<10}')
+                print(f'{lease.id:<10} {lease.owner_id:<10} {lease.book_id:<10} {lease.amount:<10}  {lease.acquisition:<14} {lease.return_date:<10} {lease.status:<10}')
                 count += 1
         if count == 0:
             return print('No leases available to this user!')
         rental_id = read.read_int('Select a rental ID to return: ')
-        id_query = Db.session.query(Db.Leases).filter_by(rental_id=rental_id).first()
+        id_query = Db.session.query(Db.Leases).filter_by(id=rental_id).first()
 
         if not id_query:
             return print('Rental ID not found!')
@@ -110,7 +97,7 @@ def return_book():
         id_query.status = 'Inactive'
         Db.session.commit()
     except Exception as e:
-        print(f'Error returning book: {e}')
+        print(f'\33[31mError returning book: {e}\33[m')
 
 def show_list(table_class, columns):
     table_lists =  Db.session.query(table_class).all()
@@ -138,4 +125,21 @@ def stock_update(book_id, stock):
             Db.session.commit()
             print('Stock updated sucessfully!')
     except Exception as e:
-        print('ERROR to update book:', e)
+        print(f'\33[31mERROR to update book:{e}')
+
+def table_update(table):
+    try:
+        list_to_show(table)
+        id_to_update = read.read_int('Select a ID to update: ')
+        columns = Db.Books.metadata.tables[table].columns.keys()
+        column = columns[int(form.menu(columns)-1)]
+        table_class = getattr(Db, table)
+        update = Db.session.query(table_class).filter_by(id = id_to_update).first()
+        if not update:
+            print('ID not found!')
+        new_data = input('Enter new data: ')
+        setattr(update, column, new_data)
+        Db.session.commit()
+        print(f'{column} data updated sucessfully!')
+    except Exception as e:
+        print(f'\33[31mERROR to update table:{e}')
