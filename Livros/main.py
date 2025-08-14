@@ -2,7 +2,7 @@ from common import rental_logic as rl, text_formatter as form
 
 while True:
     form.menu_title('BOOK RENTAL STORE')
-    choice = form.menu(['Books available', 'Rent a book', 'Return a book', 'Stock (EMPLOYEES ONLY)', 'Exit'])
+    choice = form.menu(['Books available', 'Rent a book', 'Return a book', 'Database management (EMPLOYEES ONLY)', 'Exit'])
     match choice:
         case 1:
             rl.list_to_show('Books')
@@ -11,8 +11,8 @@ while True:
         case 3:
             rl.return_book()
         case 4:
-            form.menu_title('STOCK OPTIONS')
-            choice = form.menu(['Add new', 'Delete data','Update table', 'Return to main menu'])
+            form.menu_title('Database management')
+            choice = form.menu(['Add new', 'Delete data','Update table','Show table', 'Return to main menu'])
             match choice:
                 case 1:
                     form.menu_title('ADD OPTIONS')
@@ -51,7 +51,17 @@ while True:
                         case 4:
                             continue
                 case 4:
-                    continue
+                    form.menu_title('SHOW OPTIONS')
+                    choice = form.menu(['Show books', 'Show users', 'Show leases', 'Return to main menu'])
+                    match choice:
+                        case 1:
+                            rl.list_to_show('Books')
+                        case 2:
+                            rl.list_to_show('Users')
+                        case 3:
+                            rl.list_to_show('Leases')
+                        case 4:
+                            continue
                 case _:
                     form.adaptive_line('\33[31mERROR! Option not found\33[m')
         case 5:
