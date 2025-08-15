@@ -4,67 +4,69 @@ while True:
     form.menu_title('BOOK RENTAL STORE')
     choice = form.menu(['Books available', 'Rent a book', 'Return a book', 'Database management (EMPLOYEES ONLY)', 'Exit'])
     match choice:
-        case 1:
+        case 'Books available':
             rl.list_to_show('Books')
-        case 2:
+        case 'Rent a book':
             rl.add_new('leases')
-        case 3:
+        case 'Return a book':
             rl.return_book()
-        case 4:
+        case 'Database management (EMPLOYEES ONLY)':
             form.menu_title('Database management')
             choice = form.menu(['Add new', 'Delete data','Update table','Show table', 'Return to main menu'])
             match choice:
-                case 1:
+                case 'Add new':
                     form.menu_title('ADD OPTIONS')
                     choice = form.menu(['Add new book', 'Add new user', 'Add new lease', 'Return to main menu'])
                     match choice:
-                        case 1:
+                        case 'Add new book':
                             rl.add_new('book')
-                        case 2:
+                        case 'Add new user':
                             rl.add_new('user')
-                        case 3:
+                        case 'Add new lease':
                             rl.add_new('lease')
-                        case 4:
+                        case 'Return to main menu':
                             continue
-                case 2:
+                case 'Delete data':
                     form.menu_title('DELETE OPTIONS')
                     choice = form.menu(['Delete book', 'Delete user', 'Delete lease', 'Return to main menu'])
                     match choice:
-                        case 1:
+                        case 'Delete book':
                             rl.delete_from_table('Books')
-                        case 2:
+                        case 'Delete user':
                             rl.delete_from_table('Users')
-                        case 3:
+                        case 'Delete lease':
                             rl.delete_from_table('Leases')
-                        case 4:
+                        case 'Return to main menu':
                             continue
-                case 3:
+                case 'Update table':
                     form.menu_title('UPDATE OPTIONS')
                     choice = form.menu(['Update book', 'Update user', 'Update lease', 'Return to main menu'])
                     match choice:
-                        case 1:
+                        case 'Update book':
                             rl.table_update('Books')
-                        case 2:
+                        case 'Update user':
                             rl.table_update('Users')
-                        case 3:
+                        case 'Update lease':
                             rl.table_update('Leases')
-                        case 4:
+                        case 'Return to main menu':
                             continue
-                case 4:
+                case 'Show table':
                     form.menu_title('SHOW OPTIONS')
                     choice = form.menu(['Show books', 'Show users', 'Show leases', 'Return to main menu'])
                     match choice:
-                        case 1:
+                        case 'Show books':
                             rl.list_to_show('Books')
-                        case 2:
+                        case 'Show users':
                             rl.list_to_show('Users')
-                        case 3:
+                        case 'Show leases':
                             rl.list_to_show('Leases')
-                        case 4:
+                        case 'Return to main menu':
                             continue
+                case 'Return to main menu':
+                    continue
                 case _:
                     form.adaptive_line('\33[31mERROR! Option not found\33[m')
-        case 5:
+        case 'Exit':
             break
         case _:
             form.adaptive_line('\33[31mERROR! Option not found\33[m')

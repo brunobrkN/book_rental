@@ -156,6 +156,6 @@ def table_update(table):
         new_data = input('Enter new data: ')
         setattr(update, column, new_data)
         Db.session.commit()
-        return print(f'{column} data updated sucessfully!')
+        return print(f'{column} data updated successfully!')
     except Exception as e:
         return print(f'\33[31mERROR to update table:{e}')

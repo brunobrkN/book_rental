@@ -67,7 +67,3 @@ def read_new_lease( ):
     amount = read_int('How many books do you want to rent?: ')
     email = input('Email: ').lower().strip()
     return email,amount,book_id
-
-def read_menu_choice():
-    choice = read_int('Select an option: ')
-    return choice

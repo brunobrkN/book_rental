@@ -27,6 +27,7 @@ def menu(options):
     count = 1
     for i in options:
         print(f'\33[36m{count}-\33[34m {i}\33[m')
+
         count += 1
-    choice = read.read_menu_choice()
-    return choice
+    choice = read.read_int('Select an option: ')
+    return options[choice - 1]
