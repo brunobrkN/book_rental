@@ -18,7 +18,7 @@ def menu_title(msg):
     print(msg.center(60))
     line()
 
-def menu(options):
+def menu(options, numeric = False):
     """
     → Lista para o usuário as opções disponíveis no menu
     :param options: Todas as opções possíveis (pode ser adicionado diretamente no código principal)
@@ -30,4 +30,7 @@ def menu(options):
 
         count += 1
     choice = read.read_int('Select an option: ')
-    return options[choice - 1]
+    if not numeric:
+        return options[choice - 1]
+    else:
+        return choice

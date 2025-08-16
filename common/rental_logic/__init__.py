@@ -128,7 +128,7 @@ def list_to_show(table):
     if table == 'Leases':
         width = [9,8,7,6,11,11,8]
     else:
-        width = [4,25,15,4,4]
+        width = [4,50,30,4,4]
     columns_dict = dict(zip(columns, width))
     header = ' '.join(f'{column.title():<{width}}' for column, width in columns_dict.items()).replace('_', ' ')
     form.adaptive_line(header, True)
@@ -148,7 +148,7 @@ def table_update(table):
         list_to_show(table)
         id_to_update = read.read_int('Select a ID to update: ')
         columns = Db.Books.metadata.tables[table].columns.keys()
-        column = columns[int(form.menu(columns)-1)]
+        column = columns[int(form.menu(columns, numeric = True)-1)]
         table_class = getattr(Db, table)
         update = Db.session.query(table_class).filter_by(id = id_to_update).first()
         if not update:
